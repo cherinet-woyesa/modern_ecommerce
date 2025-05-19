@@ -1,60 +1,80 @@
 import { Link } from 'react-router-dom';
-import { Eye, Heart } from 'lucide-react';
-import { useState } from 'react';
+import { FiShoppingCart, FiHeart, FiStar } from 'react-icons/fi';
+import { useCart } from '../context/CartContext';
 
-const ProductCard = ({ product, onQuickView }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+const ProductCard = ({ product }) => {
+  const { addToCart } = useCart();
+  const [isHovered, setIsHovered] = useState(false);
+  const [isWishlist, setIsWishlist] = useState(false);
+
+  const handleAddToCart = () => {
+    addToCart(product, 1);
+  };
+
+  const handleWishlist = () => {
+    setIsWishlist(!isWishlist);
+  };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow flex flex-col h-full">
-      <div className="relative group">
-        <Link to={`/product/${product.id}`} className="block">
-          <img 
-            src={product.image} 
-            alt={product.name} 
-            className="w-full h-48 object-cover"
+    <div 
+      className="bg-white border rounded-xl shadow hover:shadow-lg transition duration-200 overflow-hidden group relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Image Container */}
+      <div className="relative">
+        <Link to={`/products/${product._id}`}>
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-60 object-cover transition-transform duration-200 group-hover:scale-105"
           />
         </Link>
-        <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <button 
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-            title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-          >
-            <Heart 
-              className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} 
-            />
-          </button>
-          <button 
-            onClick={() => onQuickView(product)}
-            className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors"
-            title="Quick View"
-          >
-            <Eye className="w-5 h-5 text-gray-700" />
-          </button>
-        </div>
-      </div>
-      
-      <div className="p-4 flex flex-col flex-grow">
-        <Link to={`/product/${product.id}`} className="block flex-grow">
-          <h3 className="text-lg font-semibold text-dark hover:text-primary mb-2">{product.name}</h3>
-          <div className="flex items-center mb-2">
-            <div className="flex text-yellow-400">
-              {'★'.repeat(Math.floor(product.rating))}
-              {'☆'.repeat(5 - Math.floor(product.rating))}
-            </div>
-            <span className="text-gray-500 text-sm ml-1">({product.rating})</span>
-          </div>
-        </Link>
         
-        <div className="flex justify-between items-center mt-auto">
-          <span className="text-xl font-bold text-primary">${product.price.toFixed(2)}</span>
-          <button 
-            className="bg-primary text-white px-3 py-1 rounded hover:bg-blue-600 transition-colors"
-            onClick={() => onQuickView(product)}
+        {/* Wishlist Button */}
+        <button
+          onClick={handleWishlist}
+          className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-lg hover:bg-gray-50 transition"
+        >
+          <FiHeart className={`w-5 h-5 ${isWishlist ? 'text-red-500' : 'text-gray-400'}`} />
+        </button>
+
+        {/* Stock Status */}
+        {product.stock < 10 && (
+          <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-bold">
+            Low Stock
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name}</h3>
+          <div className="flex items-center">
+            {[...Array(5)].map((_, i) => (
+              <FiStar key={i} className={`w-4 h-4 ${i < Math.floor(product.rating) ? 'text-yellow-400' : 'text-gray-300'}`} />
+            ))}
+          </div>
+        </div>
+
+        <p className="text-blue-600 font-bold mt-1">${product.price.toFixed(2)}</p>
+
+        {/* Action Buttons */}
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={handleAddToCart}
+            className="flex-1 bg-blue-600 text-white text-sm px-3 py-2 rounded hover:bg-blue-700 transition flex items-center justify-center gap-2"
           >
+            <FiShoppingCart className="w-4 h-4" />
             Add to Cart
           </button>
+          <Link
+            to={`/products/${product._id}`}
+            className="flex-1 bg-gray-100 text-gray-800 text-sm px-3 py-2 rounded hover:bg-gray-200 transition flex items-center justify-center gap-2"
+          >
+            View Details
+          </Link>
         </div>
       </div>
     </div>

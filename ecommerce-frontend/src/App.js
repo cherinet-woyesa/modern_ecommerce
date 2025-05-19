@@ -1,50 +1,60 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Products from './pages/Products';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
-
-import Orders from './pages/Orders';
-
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ProtectedRoute from './components/ProtectedRoute';
+import Home from './pages/Home';
+import Products from './pages/Products';
+import ProductDetails from './pages/ProductDetails';
+import CartPage from './pages/CartPage';
+import CheckoutPage from './pages/CheckoutPage';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import NewArrivals from './pages/NewArrivals';
+import OrderConfirmation from './pages/OrderConfirmation';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import { useAuth } from './context/AuthContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 
+function PrivateRoute({ children }) {
+  const { currentUser } = useAuth();
+  return currentUser ? children : <Navigate to="/login" />;
+}
+
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <CartProvider>
-          <div className="flex flex-col min-h-screen">
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen bg-gray-50">
             <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/products" element={<Products />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                
-                {/* Protected routes */}
-                <Route element={<ProtectedRoute />}>
-                  
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                </Route>
-                
-                {/* 404 page */}
-                
-              </Routes>
-            </main>
-            <Footer />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/category/fashion" element={<Products category="fashion" />} />
+              <Route path="/category/electronics" element={<Products category="electronics" />} />
+              <Route path="/category/laptops" element={<Products category="laptops" />} />
+              <Route path="/wishlist" element={<Products category="wishlist" />} />
+              <Route path="/product/:id" element={<ProductDetails />} />
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/new-arrivals" element={<NewArrivals />} />
+              <Route path="/checkout" element={
+                <PrivateRoute>
+                  <CheckoutPage />
+                </PrivateRoute>
+              } />
+              <Route path="/order-confirmation" element={<OrderConfirmation />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/contact" element={<Contact />} />
+            </Routes>
           </div>
-        </CartProvider>
-      </AuthProvider>
-    </Router>
+          <Footer />
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
